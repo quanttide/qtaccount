@@ -68,8 +68,9 @@ class AccountApi {
   }
 
   Future<void> updateNickname(String nickname) async {
+    // 用 POST 而非 PATCH：传统版 API 网关不支持 PATCH 方法（网关实测报错）
     final resp = await _client
-        .patch(
+        .post(
           Uri.parse('$baseUrl/userinfo'),
           headers: _headers,
           body: jsonEncode({'nickname': nickname}),

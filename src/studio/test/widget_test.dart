@@ -48,7 +48,11 @@ void main() {
     expect(find.byType(LoginScreen), findsNothing);
     expect(find.text('账号'), findsOneWidget);
     expect(find.text('钱包'), findsOneWidget);
-    expect(find.text('账号信息（建设中）'), findsOneWidget);
+
+    // 切到钱包 tab（账号 tab 内为 P2 专属测试覆盖）
+    await tester.tap(find.text('钱包'));
+    await tester.pump();
+    expect(find.text('钱包（建设中）'), findsOneWidget);
   });
 
   testWidgets('登录成功后切换到主界面', (WidgetTester tester) async {

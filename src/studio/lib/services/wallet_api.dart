@@ -11,6 +11,11 @@ class WalletApiException implements Exception {
   String toString() => message;
 }
 
+/// 客户没有钱包账户（qtcloud-pay 返回 404，属业务空态而非故障）。
+class WalletNotFoundException implements Exception {
+  const WalletNotFoundException();
+}
+
 class Wallet {
   const Wallet({required this.balance, required this.accountId});
   final int balance;
@@ -70,6 +75,9 @@ class WalletApi {
     final resp = await _client
         .get(Uri.parse('$baseUrl/customers/$customerId/account'), headers: _headers)
         .timeout(const Duration(seconds: 15));
+    if (resp.statusCode == 404) {
+      throw const WalletNotFoundException();
+    }
     if (resp.statusCode != 200) {
       throw WalletApiException('获取钱包失败（HTTP ${resp.statusCode}）');
     }

@@ -8,7 +8,7 @@ import 'package:qtaccount/services/auth_service.dart';
 import 'package:qtaccount/services/wallet_api.dart';
 
 class _FakeWalletApi extends WalletApi {
-  _FakeWalletApi({List<TransactionItem>? transactions, this.fail = false})
+  _FakeWalletApi({List<TransactionItem>? transactions, this.fail = false, this.noAccount = false})
     : transactions = transactions ?? [
         const TransactionItem(id: 1, type: 'recharge', amount: 10000, note: '', createdAt: '2026-08-01T10:00:00Z'),
         const TransactionItem(id: 2, type: 'consume', amount: 2500, note: '', createdAt: '2026-08-05T12:00:00Z'),
@@ -18,9 +18,13 @@ class _FakeWalletApi extends WalletApi {
 
   final List<TransactionItem> transactions;
   final bool fail;
+  final bool noAccount;
 
   @override
   Future<Wallet> fetchWallet() async {
+    if (noAccount) {
+      throw const WalletNotFoundException();
+    }
     if (fail) {
       throw Exception('boom');
     }
@@ -64,6 +68,14 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('暂无交易流水'), findsOneWidget);
+  });
+
+  testWidgets('无钱包账户（404）显示空态而非加载失败', (WidgetTester tester) async {
+    await tester.pumpWidget(_screenWith(_FakeWalletApi(noAccount: true)));
+    await tester.pumpAndSettle();
+
+    expect(find.text('暂无钱包账户'), findsOneWidget);
+    expect(find.text('加载钱包失败，请稍后重试'), findsNothing);
   });
 
   testWidgets('加载失败显示错误与重试，重试成功恢复', (WidgetTester tester) async {

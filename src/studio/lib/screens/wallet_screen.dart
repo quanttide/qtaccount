@@ -66,6 +66,7 @@ class _WalletScreenState extends State<WalletScreen> {
   Wallet? _wallet;
   List<TransactionItem> _transactions = [];
   String? _error;
+  bool _noAccount = false;
   bool _loading = true;
 
   @override
@@ -97,6 +98,14 @@ class _WalletScreenState extends State<WalletScreen> {
         );
       }
       await _load();
+    } on WalletNotFoundException {
+      // 与 _load 一致：无钱包账户属空态而非故障
+      if (mounted) {
+        setState(() {
+          _noAccount = true;
+          _loading = false;
+        });
+      }
     } catch (_) {
       if (mounted) {
         setState(() {
@@ -111,6 +120,7 @@ class _WalletScreenState extends State<WalletScreen> {
     setState(() {
       _loading = true;
       _error = null;
+      _noAccount = false;
     });
     try {
       final wallet = await _api!.fetchWallet();
@@ -119,6 +129,14 @@ class _WalletScreenState extends State<WalletScreen> {
         setState(() {
           _wallet = wallet;
           _transactions = transactions;
+          _loading = false;
+        });
+      }
+    } on WalletNotFoundException {
+      // 该用户尚未开通钱包账户（qtcloud-pay 404），属业务空态
+      if (mounted) {
+        setState(() {
+          _noAccount = true;
           _loading = false;
         });
       }
@@ -136,6 +154,23 @@ class _WalletScreenState extends State<WalletScreen> {
   Widget build(BuildContext context) {
     if (_loading) {
       return const Center(child: CircularProgressIndicator());
+    }
+    if (_noAccount) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.account_balance_wallet_outlined, size: 56, color: Colors.grey),
+            const SizedBox(height: 12),
+            const Text('暂无钱包账户'),
+            const SizedBox(height: 4),
+            const Text(
+              '钱包账户由平台开通，暂不支持自助开通',
+              style: TextStyle(color: Colors.grey, fontSize: 12),
+            ),
+          ],
+        ),
+      );
     }
     if (_error != null) {
       return Center(

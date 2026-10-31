@@ -150,6 +150,11 @@ class _AccountScreenState extends State<AccountScreen> {
           title: const Text('邮箱'),
           subtitle: Text(info.email.isEmpty ? '未绑定' : info.email),
         ),
+        ListTile(
+          leading: const Icon(Icons.shield_outlined),
+          title: const Text('角色'),
+          subtitle: Text(info.role.isEmpty ? '普通用户' : info.role),
+        ),
         const Divider(height: 1),
         ListTile(
           leading: const Icon(Icons.lock_outline),

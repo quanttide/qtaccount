@@ -18,6 +18,7 @@ class UserInfo {
     required this.email,
     required this.phone,
     required this.nickname,
+    this.role = '',
   });
 
   final String sub;
@@ -26,12 +27,16 @@ class UserInfo {
   final String phone;
   final String nickname;
 
+  /// 角色 ID（空=普通用户；admin=管理员）。
+  final String role;
+
   factory UserInfo.fromJson(Map<String, dynamic> json) => UserInfo(
     sub: json['sub'] as String? ?? '',
     username: json['username'] as String? ?? '',
     email: json['email'] as String? ?? '',
     phone: json['phone'] as String? ?? '',
     nickname: json['nickname'] as String? ?? '',
+    role: json['role'] as String? ?? '',
   );
 }
 

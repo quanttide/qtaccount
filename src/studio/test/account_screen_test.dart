@@ -58,7 +58,7 @@ Widget _screenWith(_FakeAccountApi api) => MaterialApp(
 );
 
 void main() {
-  testWidgets('账号信息页展示昵称/用户名/手机号/邮箱', (WidgetTester tester) async {
+  testWidgets('账号信息页展示昵称/用户名/手机号/邮箱/角色', (WidgetTester tester) async {
     await tester.pumpWidget(_screenWith(_FakeAccountApi()));
     await tester.pumpAndSettle();
 
@@ -66,6 +66,23 @@ void main() {
     expect(find.text('alice'), findsOneWidget);
     expect(find.text('13900139000'), findsOneWidget);
     expect(find.text('alice@example.com'), findsOneWidget);
+    expect(find.text('普通用户'), findsOneWidget); // 无角色
+  });
+
+  testWidgets('账号信息页展示管理员角色', (WidgetTester tester) async {
+    final api = _FakeAccountApi();
+    api.info = UserInfo(
+      sub: api.info.sub,
+      username: api.info.username,
+      email: api.info.email,
+      phone: api.info.phone,
+      nickname: api.info.nickname,
+      role: 'admin',
+    );
+    await tester.pumpWidget(_screenWith(api));
+    await tester.pumpAndSettle();
+
+    expect(find.text('admin'), findsOneWidget);
   });
 
   testWidgets('编辑昵称：保存后列表显示新昵称', (WidgetTester tester) async {
